@@ -8,6 +8,7 @@ import streamlit as st
 from components.charts import bar_chart, donut_chart, heatmap_chart, line_chart
 from components.layout import format_number
 from modules.analysis import capaian
+from modules.privacy import mask_nim
 from views.analysis_sections.shared import (
     chart_block,
     insight_block,
@@ -52,8 +53,9 @@ def _insights(
     if not students_frame.empty:
         top_student = students_frame.iloc[0]
         items.append(
-            f"Mahasiswa dengan prestasi terbanyak adalah {top_student['nama']} ({top_student['nim']}) "
-            f"dengan {format_number(top_student['jumlah_prestasi'])} prestasi dan {format_number(top_student['poin'])} poin."
+            f"Mahasiswa dengan prestasi terbanyak adalah {top_student['nama']} "
+            f"({mask_nim(top_student['nim'])}) dengan {format_number(top_student['jumlah_prestasi'])} "
+            f"prestasi dan {format_number(top_student['poin'])} poin."
         )
     if metrics["total_kompetisi"]:
         items.append(
@@ -97,7 +99,7 @@ def render(frame: pd.DataFrame) -> None:
             {
                 "title": "Dosen Pendamping",
                 "value": format_number(metrics["total_dosen"]),
-                "subtitle": "NUPTK unik setelah relasi",
+                "subtitle": "Dosen unik setelah relasi",
                 "color": "#1F9D55",
             },
             {

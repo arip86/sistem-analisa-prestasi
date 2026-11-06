@@ -18,7 +18,7 @@ FIELD_LABELS = {
     "tgl_sertifikat": "Tanggal sertifikat",
     "mahasiswa_nim": "NIM mahasiswa",
     "mahasiswa_nama": "Nama mahasiswa",
-    "dosen_nuptk": "NUPTK dosen",
+    "dosen_nuptk": "ID dosen",
     "dosen_nama": "Nama dosen",
     "jumlah_unit_peserta": "Jumlah unit peserta",
     "kelompok_prestasi": "Kelompok prestasi",

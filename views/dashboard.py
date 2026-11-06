@@ -19,6 +19,7 @@ from modules.analytics import (
     summary_metrics,
 )
 from modules.date_helper import format_date_id
+from modules.privacy import mask_nim
 
 
 def _recent_frame(frame: pd.DataFrame) -> pd.DataFrame:
@@ -27,7 +28,7 @@ def _recent_frame(frame: pd.DataFrame) -> pd.DataFrame:
         [
             {
                 "Tanggal": format_date_id(row.get("tgl_sertifikat")),
-                "NIM": row.get("mahasiswa_nim"),
+                "NIM": mask_nim(row.get("mahasiswa_nim")),
                 "Nama Mahasiswa": row.get("mahasiswa_nama"),
                 "Lomba": row.get("lomba"),
                 "Level": row.get("level_label"),
@@ -99,7 +100,7 @@ def render() -> None:
             {
                 "title": "Dosen Pendamping",
                 "value": format_number(metrics["total_dosen"]),
-                "subtitle": "NUPTK unik setelah relasi",
+                "subtitle": "Dosen unik setelah relasi",
                 "color": "#1F9D55",
             },
             {

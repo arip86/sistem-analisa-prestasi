@@ -5,17 +5,17 @@ Aplikasi Streamlit untuk mengimpor, memvalidasi, mengeksplorasi, menganalisis, d
 ## Fitur
 
 - Dasbor ringkasan: kartu capaian, sorotan mahasiswa/dosen/kategori/level, sebaran kategori dan level, tren bulanan, peringkat mahasiswa, peringkat, dan prestasi terbaru.
-- Data Prestasi: pencarian, filter, tabel detail, tautan dokumen, dan unduhan Excel/CSV.
+- Data Prestasi: pencarian, filter, tabel detail, dan tautan dokumen. NIM ditampilkan tersamarkan dan tidak ada unduhan data.
 - Analisis Data: enam bagian analisis dalam satu halaman:
   - Capaian: rekap kategori, level, peringkat, matriks kategori-level, tren level per tahun, dan insight otomatis.
   - Tren Waktu: tren tahunan/bulanan, pertumbuhan, perbandingan dua periode, dan pola musiman per tahun.
   - Mahasiswa: ranking jumlah prestasi/poin, konsistensi, distribusi prestasi, komposisi individu/kelompok, dan prestasi internasional.
   - Dosen: ranking dosen, jumlah mahasiswa dampingan, serta sebaran level dan kategori.
   - Kompetisi: peringkat edisi lomba, rekap level, penyelenggara, cabang, dan kompetisi berulang.
-  - Kualitas Data: kelengkapan field, validitas NIM/NUPTK, dokumen pendukung, duplikat potensial, dan field opsional kosong.
-- Laporan: pratinjau laporan serta unduhan Excel dan PDF sesuai filter aktif.
+  - Kualitas Data: kelengkapan field, validitas identitas, dokumen pendukung, duplikat potensial, dan field opsional kosong.
+- Laporan: pratinjau laporan rekap dan peringkat sesuai filter aktif, tanpa unduhan file.
 - Impor Data: unggah Excel/CSV, deteksi header otomatis, validasi baris, deteksi duplikat, dan riwayat import.
-- Normalisasi data: spasi berlebih, kode level/peringkat, URL, tanggal, angka, NIM, dan NUPTK.
+- Normalisasi data: spasi berlebih, kode level/peringkat, URL, tanggal, angka, serta identitas mahasiswa dan dosen.
 - Duplikat potensial tetap diimpor dan ditandai untuk verifikasi manual.
 
 ## Struktur Proyek
@@ -24,7 +24,7 @@ Aplikasi Streamlit untuk mengimpor, memvalidasi, mengeksplorasi, menganalisis, d
 app.py                  Titik masuk Streamlit dan navigasi
 config/                 Konfigurasi aplikasi dan konstanta
 database/               Koneksi, model SQLAlchemy, dan repository
-modules/                Loader, cleaner, normalizer, validator, analytics, import, export
+modules/                Loader, cleaner, normalizer, validator, analytics, import, privasi
 modules/analysis/       Modul analisis reusable per topik (capaian, tren, mahasiswa, dosen, kompetisi, kualitas)
 components/             Komponen UI, chart, filter, dan akses data ter-cache
 views/                  Halaman fitur
@@ -179,8 +179,8 @@ Jangan memasukkan kredensial admin Neon ke secrets aplikasi. `ANONYMIZATION_SALT
 - Badge database pada sidebar menunjukkan `Terhubung`.
 - Jumlah prestasi, mahasiswa, dosen, dan kategori muncul.
 - Menu **Impor Data** tidak tampil.
-- Halaman Data Prestasi hanya menampilkan identitas yang sudah dianonimkan.
-- Unduhan Excel dan PDF berfungsi.
+- Halaman Data Prestasi menampilkan NIM tersamarkan dan tidak menampilkan ID dosen.
+- Tidak ada tombol unduh Excel, CSV, atau PDF.
 - Tidak ada error koneksi pada log Streamlit Cloud.
 
 ### 7. Catatan Keamanan
@@ -237,7 +237,7 @@ pip install -r requirements-dev.txt
 pytest -q
 ```
 
-Test mencakup pembersihan dan normalisasi data, validasi file sumber, perhitungan analytics lama dan baru, ekspor Excel/PDF, smoke test database, serta smoke test halaman Dasbor dan Analisis Data menggunakan Streamlit AppTest jika database siap.
+Test mencakup pembersihan dan normalisasi data, validasi file sumber, perhitungan analytics lama dan baru, masking NIM, smoke test database, serta smoke test halaman Dasbor dan Analisis Data menggunakan Streamlit AppTest jika database siap.
 
 ## Catatan Data
 

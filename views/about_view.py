@@ -26,8 +26,8 @@ def render() -> None:
     if settings.PUBLIC_READ_ONLY:
         source_description = (
             "Aplikasi publik ini menggunakan dataset prestasi yang telah dianonimkan. "
-            "Nama mahasiswa, NIM, nama dosen, NUPTK, tautan dokumen, dan keterangan tidak "
-            "ditampilkan dalam bentuk aslinya."
+            "Nama mahasiswa, NIM yang ditampilkan dalam bentuk tersamarkan, nama dosen, "
+            "tautan dokumen, dan keterangan tidak ditampilkan dalam bentuk aslinya."
         )
         database_info = "PostgreSQL terkonfigurasi"
     else:
@@ -103,7 +103,7 @@ def render() -> None:
             """
             1. File Excel atau CSV diunggah dan header kolom dideteksi otomatis.
             2. Data dinormalisasi: spasi, kode level, kode peringkat, URL, tanggal, dan angka.
-            3. Validasi memeriksa kolom wajib, NIM, NUPTK, level, peringkat, tanggal, jumlah peserta, dan URL.
+            3. Validasi memeriksa kolom wajib, identitas mahasiswa dan dosen, level, peringkat, tanggal, jumlah peserta, dan URL.
             4. Fingerprint baris digunakan untuk mencegah duplikat saat impor berulang.
             5. Data valid disimpan ke PostgreSQL, lalu seluruh halaman membaca data dari database.
             """
@@ -112,7 +112,7 @@ def render() -> None:
     with st.expander("Teknologi"):
         st.markdown(
             """
-            Streamlit, pandas, Plotly, SQLAlchemy, PostgreSQL, openpyxl, dan ReportLab.
+            Streamlit, pandas, Plotly, SQLAlchemy, PostgreSQL, dan openpyxl.
             Struktur aplikasi memisahkan konfigurasi, akses database, modul pengolahan data,
             komponen antarmuka, dan halaman fitur.
             """

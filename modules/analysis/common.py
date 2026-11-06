@@ -443,7 +443,7 @@ def lecturer_distribution(frame: pd.DataFrame, dimension: str, top_n: int = 10) 
     data = lecturer_rows(frame)
     if data.empty:
         return pd.DataFrame(columns=columns)
-    data["dosen_label"] = data["nama"] + " (" + data["nuptk"] + ")"
+    data["dosen_label"] = data["nama"]
     totals = (
         data.groupby("dosen_label")["prestasi_id"]
         .nunique()

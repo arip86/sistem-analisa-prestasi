@@ -19,7 +19,6 @@ from views.analysis_sections.shared import (
 
 RANK_LABELS = {
     "ranking": "Peringkat",
-    "nuptk": "NUPTK",
     "nama": "Nama Dosen",
     "jumlah_prestasi": "Jumlah Prestasi",
     "jumlah_mahasiswa": "Jumlah Mahasiswa",
@@ -79,7 +78,7 @@ def render(frame: pd.DataFrame) -> None:
             {
                 "title": "Dosen Pendamping",
                 "value": format_number(metrics["total_dosen"]),
-                "subtitle": "NUPTK unik setelah relasi",
+                "subtitle": "Dosen unik setelah relasi",
                 "color": "#1E4E8C",
             },
             {
@@ -125,7 +124,7 @@ def render(frame: pd.DataFrame) -> None:
         )
     with controls[2]:
         search = st.text_input(
-            "Cari nama atau NUPTK",
+            "Cari nama dosen",
             key="analysis_lecturer_search",
             placeholder="Kata kunci",
         )
@@ -140,13 +139,12 @@ def render(frame: pd.DataFrame) -> None:
         keyword = search.strip().lower()
         filtered = ranking[
             ranking["nama"].fillna("").str.lower().str.contains(keyword, regex=False)
-            | ranking["nuptk"].fillna("").astype(str).str.contains(keyword, regex=False)
         ]
     if filtered.empty:
         st.info("Tidak ada dosen yang sesuai pencarian.")
     else:
         chart_data = filtered.head(limit).copy()
-        chart_data["label"] = chart_data["nama"] + " (" + chart_data["nuptk"] + ")"
+        chart_data["label"] = chart_data["nama"]
         left, right = st.columns([1.15, 1])
         with left:
             chart_block(
@@ -168,6 +166,7 @@ def render(frame: pd.DataFrame) -> None:
             ).copy()
             display = display.reset_index(drop=True)
             display["ranking"] = range(1, len(display) + 1)
+            display = display.drop(columns=["nuptk"], errors="ignore")
             ranking_table(display, RANK_LABELS, height=450)
 
     left, right = st.columns(2)

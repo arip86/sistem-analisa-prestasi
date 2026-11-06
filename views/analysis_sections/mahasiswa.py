@@ -8,6 +8,7 @@ import streamlit as st
 from components.charts import bar_chart, donut_chart, ranking_bar_chart
 from components.layout import format_number
 from modules.analysis import mahasiswa as analysis
+from modules.privacy import mask_nim, mask_nim_column
 from views.analysis_sections.shared import (
     chart_block,
     insight_block,
@@ -56,7 +57,7 @@ def _insights(
     if not ranking.empty:
         top = ranking.iloc[0]
         items.append(
-            f"Mahasiswa dengan prestasi terbanyak adalah {top['nama']} ({top['nim']}) "
+            f"Mahasiswa dengan prestasi terbanyak adalah {top['nama']} ({mask_nim(top['nim'])}) "
             f"dengan {format_number(top['jumlah_prestasi'])} prestasi dan {format_number(top['poin'])} poin."
         )
     if metrics["mahasiswa_multiple"]:
@@ -152,12 +153,13 @@ def render(frame: pd.DataFrame) -> None:
             placeholder="Kata kunci",
         )
     value_column = "poin" if metric_label == "Poin" else "jumlah_prestasi"
-    filtered = ranking
+    display_ranking = mask_nim_column(ranking)
+    filtered = display_ranking
     if search.strip():
         keyword = search.strip().lower()
-        filtered = ranking[
-            ranking["nama"].fillna("").str.lower().str.contains(keyword, regex=False)
-            | ranking["nim"].fillna("").astype(str).str.contains(keyword, regex=False)
+        filtered = display_ranking[
+            display_ranking["nama"].fillna("").str.lower().str.contains(keyword, regex=False)
+            | display_ranking["nim"].fillna("").astype(str).str.contains(keyword, regex=False)
         ]
     if filtered.empty:
         st.info("Tidak ada mahasiswa yang sesuai pencarian.")
@@ -197,14 +199,15 @@ def render(frame: pd.DataFrame) -> None:
         key="analysis_student_consistency_min",
     )
     consistent = consistency[consistency["jumlah_prestasi"] >= minimum]
+    consistent_display = mask_nim_column(consistent)
     table_block(
-        consistent,
+        consistent_display,
         labels=CONSISTENCY_LABELS,
         height=360,
         empty_message="Belum ada mahasiswa yang memenuhi kriteria konsistensi.",
     )
     if not consistent.empty:
-        top_consistent = consistent.head(10).copy()
+        top_consistent = mask_nim_column(consistent.head(10))
         top_consistent["label"] = top_consistent["nama"] + " (" + top_consistent["nim"] + ")"
         chart_block(
             bar_chart(
@@ -253,7 +256,7 @@ def render(frame: pd.DataFrame) -> None:
         "Daftar mahasiswa dengan prestasi pada level internasional.",
     )
     table_block(
-        international,
+        mask_nim_column(international),
         labels={
             "nim": "NIM",
             "nama": "Nama Mahasiswa",

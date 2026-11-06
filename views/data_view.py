@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Optional
 
 import pandas as pd
@@ -20,12 +19,7 @@ from config import settings
 from config.constants import CATEGORY_SHORT_LABELS
 from modules.data_normalizer import is_valid_url
 from modules.date_helper import format_date_id
-from modules.excel_export import build_data_excel
-
-
-@st.cache_data(show_spinner=False)
-def _excel_bytes(frame: pd.DataFrame) -> bytes:
-    return build_data_excel(frame)
+from modules.privacy import mask_nim
 
 
 def _display_frame(frame: pd.DataFrame) -> pd.DataFrame:
@@ -34,7 +28,7 @@ def _display_frame(frame: pd.DataFrame) -> pd.DataFrame:
         rows.append(
             {
                 "Tanggal": format_date_id(row.get("tgl_sertifikat")),
-                "NIM": row.get("mahasiswa_nim"),
+                "NIM": mask_nim(row.get("mahasiswa_nim")),
                 "Nama Mahasiswa": row.get("mahasiswa_nama"),
                 "Kategori": CATEGORY_SHORT_LABELS.get(
                     row.get("kategori_kode"), row.get("kategori_nama") or row.get("kategori_kode")
@@ -54,12 +48,15 @@ def _display_frame(frame: pd.DataFrame) -> pd.DataFrame:
 def _search(frame: pd.DataFrame, query: str) -> pd.DataFrame:
     if not query.strip():
         return frame
+    searchable = frame.copy()
+    if "mahasiswa_nim" in searchable.columns:
+        searchable["mahasiswa_nim"] = searchable["mahasiswa_nim"].map(mask_nim)
     columns = ["mahasiswa_nim", "mahasiswa_nama", "dosen_nama", "lomba", "cabang", "penyelenggara", "keterangan"]
-    mask = pd.Series(False, index=frame.index)
+    mask = pd.Series(False, index=searchable.index)
     keyword = query.strip().lower()
     for column in columns:
-        if column in frame.columns:
-            mask = mask | frame[column].fillna("").astype(str).str.lower().str.contains(keyword, regex=False)
+        if column in searchable.columns:
+            mask = mask | searchable[column].fillna("").astype(str).str.lower().str.contains(keyword, regex=False)
     return frame[mask].reset_index(drop=True)
 
 
@@ -68,7 +65,7 @@ def _selected_row(frame: pd.DataFrame, key: str) -> Optional[pd.Series]:
         return None
     labels = {
         int(row["prestasi_id"]): (
-            f"Baris {row.get('source_row_number')} | {row.get('mahasiswa_nim')} - "
+            f"Baris {row.get('source_row_number')} | {mask_nim(row.get('mahasiswa_nim'))} - "
             f"{row.get('mahasiswa_nama')} | {row.get('lomba')}"
         )
         for _, row in frame.iterrows()
@@ -109,9 +106,8 @@ def _render_detail(row: pd.Series) -> None:
         detail_card(
             "Mahasiswa dan Dosen",
             [
-                ("NIM", row.get("mahasiswa_nim")),
+                ("NIM", mask_nim(row.get("mahasiswa_nim"))),
                 ("Nama Mahasiswa", row.get("mahasiswa_nama")),
-                ("NUPTK Dosen", row.get("dosen_nuptk")),
                 ("Nama Dosen", row.get("dosen_nama")),
                 ("Sumber Baris", row.get("source_row_number")),
                 ("ID Prestasi", row.get("prestasi_id")),
@@ -160,7 +156,7 @@ def render() -> None:
     with search_columns[0]:
         query = st.text_input(
             "Cari data",
-            placeholder="Cari NIM, nama mahasiswa, dosen, lomba, cabang, atau penyelenggara",
+            placeholder="Cari NIM tersamarkan, nama mahasiswa, dosen, lomba, cabang, atau penyelenggara",
             key="data_search",
         )
     with search_columns[1]:
@@ -178,24 +174,6 @@ def render() -> None:
     if duplicate_count:
         caption += f" | {format_number(duplicate_count)} ditandai sebagai duplikat potensial"
     st.caption(caption)
-
-    export_left, export_right, _ = st.columns([1, 1, 3])
-    with export_left:
-        st.download_button(
-            "Unduh Excel",
-            data=_excel_bytes(data),
-            file_name=f"data_prestasi_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            width="stretch",
-        )
-    with export_right:
-        st.download_button(
-            "Unduh CSV",
-            data=display.to_csv(index=False).encode("utf-8-sig"),
-            file_name=f"data_prestasi_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
-            mime="text/csv",
-            width="stretch",
-        )
 
     table_tab, detail_tab = st.tabs(["Tabel Prestasi", "Detail Prestasi"])
     with table_tab:

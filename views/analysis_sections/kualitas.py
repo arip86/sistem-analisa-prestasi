@@ -8,6 +8,7 @@ import streamlit as st
 from components.charts import bar_chart
 from components.layout import format_number
 from modules.analysis import kualitas as analysis
+from modules.privacy import mask_nim_column
 from views.analysis_sections.shared import (
     chart_block,
     insight_block,
@@ -52,7 +53,7 @@ def _insights(
                 f"Terdapat {format_number(invalid_total)} nilai identitas mahasiswa atau dosen yang tidak sesuai pola."
             )
         else:
-            items.append("Seluruh NIM dan NUPTK yang terisi sesuai pola validasi.")
+            items.append("Seluruh NIM dan ID dosen yang terisi sesuai pola validasi.")
     if metrics["data_tidak_lengkap"]:
         items.append(
             f"Terdapat {format_number(metrics['data_tidak_lengkap'])} prestasi dengan setidaknya satu field opsional kosong."
@@ -93,7 +94,7 @@ def render(frame: pd.DataFrame) -> None:
             {
                 "title": "Identitas Tidak Valid",
                 "value": format_number(metrics["nim_tidak_valid"] + metrics["nuptk_tidak_valid"]),
-                "subtitle": f"NIM {format_number(metrics['nim_tidak_valid'])}, NUPTK {format_number(metrics['nuptk_tidak_valid'])}",
+                "subtitle": f"NIM {format_number(metrics['nim_tidak_valid'])}, ID dosen {format_number(metrics['nuptk_tidak_valid'])}",
                 "color": "#C0392B" if (metrics["nim_tidak_valid"] + metrics["nuptk_tidak_valid"]) else "#1F9D55",
             },
         ],
@@ -139,7 +140,7 @@ def render(frame: pd.DataFrame) -> None:
 
     section_header(
         "Validitas Identitas",
-        "Validasi pola NIM (5-20 digit) dan NUPTK (16 digit).",
+        "Validasi pola NIM (5-20 digit) dan ID dosen (16 digit).",
     )
     table_block(
         identities,
@@ -187,7 +188,7 @@ def render(frame: pd.DataFrame) -> None:
         "Baris yang memiliki kemiripan atribut dan perlu diverifikasi manual sebelum digabung atau dihapus.",
     )
     table_block(
-        duplicates,
+        mask_nim_column(duplicates),
         labels={
             "prestasi_id": "ID Prestasi",
             "jumlah_baris": "Jumlah Baris",
@@ -230,7 +231,7 @@ def render(frame: pd.DataFrame) -> None:
         <div class="sapm-note">
             Kualitas data dihitung pada data setelah filter. Duplikat potensial adalah penanda sistem
             untuk verifikasi manual, bukan keputusan akhir untuk menghapus data. Validitas identitas
-            memeriksa setiap NIM dan NUPTK yang dipisahkan dengan titik koma.
+            memeriksa setiap NIM dan ID dosen yang dipisahkan dengan titik koma.
         </div>
         """,
         unsafe_allow_html=True,
